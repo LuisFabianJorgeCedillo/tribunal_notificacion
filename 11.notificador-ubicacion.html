@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guardar ubicación</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <div class="brand">
+      <div class="brand__logo">📍</div>
+      <h1 class="brand__title">Guardar ubicación</h1>
+      <p class="brand__subtitle">Se registrará la ubicación actual en la notificación</p>
+    </div>
+
+    <!-- Cambia el value de 'gps' por tus coordenadas reales -->
+    <form class="form" action="9.notificador-nueva.html" method="get" novalidate>
+      <input type="hidden" name="gps" value="-19.0433, -65.2592" />
+
+      <div class="list">
+        <div class="item">
+          <div>
+            <div class="item__title">Ubicación a registrar</div>
+            <div class="item__meta">-19.0433, -65.2592</div>
+          </div>
+          <span class="chip">Actual</span>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:12px;">
+        <button class="btn" type="submit">Guardar ubicación</button>
+      </div>
+    </form>
+  </section>
+</main>
+</body>
+</html>

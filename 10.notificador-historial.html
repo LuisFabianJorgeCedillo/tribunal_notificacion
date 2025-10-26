@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Historial de notificaciones</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <div class="brand">
+      <div class="brand__logo">🗂️</div>
+      <h1 class="brand__title">Historial</h1>
+      <p class="brand__subtitle">Búsqueda y filtros</p>
+    </div>
+
+    <form class="form" action="#" method="get" novalidate>
+      <div class="grid">
+        <div class="field">
+          <label for="buscar">Buscar por causa</label>
+          <input id="buscar" type="text" placeholder="Ej. 123/2025" />
+        </div>
+        <div class="field">
+          <label for="estado">Estado</label>
+          <select id="estado">
+            <option value="">Todos</option>
+            <option>Enviada</option>
+            <option>Borrador</option>
+            <option>Pendiente</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="5.notificador-dashboard.html">Volver</a>
+        <button class="btn btn--ghost" type="submit">Buscar</button>
+        
+      </div>
+    </form>
+
+    <div class="list" style="margin-top:10px">
+      <a class="item" href="notificador-detalle.html">
+        <div>
+          <div class="item__title">123/2025 · Pegada en puerta</div>
+          <div class="item__meta">08/10/2025 · Av. Junín N° 234</div>
+        </div>
+        <span class="chip chip--ok">Enviada</span>
+      </a>
+      <a class="item" href="notificador-detalle.html">
+        <div>
+          <div class="item__title">456/2025 · Personal</div>
+          <div class="item__meta">07/10/2025 · Calle Ayacucho</div>
+        </div>
+        <span class="chip chip--warn">Borrador</span>
+      </a>
+    </div>
+  </section>
+</main>
+</body>
+</html>

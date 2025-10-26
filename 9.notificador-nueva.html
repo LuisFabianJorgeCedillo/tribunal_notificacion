@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nueva notificación</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .row .field { flex: 1; min-width: 220px; }
+    .row--full .field { flex-basis: 100%; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#fff; }
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <div class="brand">
+      <div class="brand__logo">📄</div>
+      <h1 class="brand__title">Nueva notificación</h1>
+      <p class="brand__subtitle">Carga de datos, evidencia y ubicación</p>
+    </div>
+
+    <form class="form" action="12.notificador-confirmacion.html" method="get" enctype="multipart/form-data" novalidate>
+      <!-- Fila 1 -->
+      <div class="row">
+        <div class="field">
+          <label for="nro">Nro. de causa / expediente</label>
+          <input id="nro" name="nro" type="text" placeholder="123/2025" />
+        </div>
+        <div class="field">
+          <label for="notificador">Nombre del notificador</label>
+          <input id="notificador" name="notificador" type="text" placeholder="Juan Pérez" />
+        </div>
+        <div class="field">
+          <label for="fecha">Fecha de notificación</label>
+          <input id="fecha" name="fecha" type="date" />
+        </div>
+        <div class="field">
+          <label for="hora">Hora (opcional)</label>
+          <input id="hora" name="hora" type="time" />
+        </div>
+      </div>
+
+      <!-- Fila 2 -->
+      <div class="row row--full">
+        <div class="field">
+          <label for="direccion">Dirección / lugar</label>
+          <input id="direccion" name="direccion" type="text" placeholder="Av. Junín N° 234, Zona Central" />
+        </div>
+      </div>
+
+      <!-- 🔹 Nuevo campo: N° de casa -->
+      <div class="row row--full">
+        <div class="field">
+          <label for="nro_casa">N° de casa</label>
+          <input id="nro_casa" name="nro_casa" type="text" placeholder="Ej: 45" />
+        </div>
+      </div>
+
+      <!-- Fila 3 -->
+      <div class="row">
+        <div class="field">
+          <label for="tipo">Tipo de notificación</label>
+          <select id="tipo" name="tipo">
+            <option value="">Selecciona...</option>
+            <option>Personal</option>
+            <option>Pegada en puerta</option>
+            <option>En secretaría</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="motivo">Motivo de pegado</label>
+          <input id="motivo" name="motivo" type="text" placeholder="No se encontró al destinatario" />
+        </div>
+      </div>
+
+      <!-- Fila 4 -->
+      <div class="row row--full">
+        <div class="field">
+          <label for="obs">Observaciones</label>
+          <textarea id="obs" name="observaciones" rows="4" placeholder="Puerta cerrada, se dejó copia visible."></textarea>
+        </div>
+      </div>
+
+      <!-- Fila 5: Evidencia + Ubicación mostrada -->
+      <div class="row">
+        <div class="field">
+          <label for="foto">Foto de evidencia</label>
+          <input id="foto" name="foto" type="file" accept="image/*" />
+        </div>
+
+        <div class="field">
+          <label>Ubicación capturada</label>
+          <!-- Se llena automáticamente si viene ?gps= en la URL -->
+          <div id="gps-pill" class="pill" aria-live="polite">Sin ubicación</div>
+          <!-- Este hidden viaja a la confirmación -->
+          <input type="hidden" id="gps" name="gps" value="" />
+          <div class="actions" style="margin-top:8px;">
+            <a class="btn btn--ghost" href="11.notificador-ubicacion.html">Tomar ubicación</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:12px;">
+        <button class="btn" type="submit">Continuar</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<!-- Mini script para leer ?gps= y mostrarlo (sin pedir nada al usuario) -->
+<script>
+  (function () {
+    const params = new URLSearchParams(location.search);
+    const gps = params.get('gps');
+    if (gps) {
+      document.getElementById('gps-pill').textContent = gps;
+      document.getElementById('gps').value = gps;
+    }
+  })();
+</script>
+</body>
+</html>

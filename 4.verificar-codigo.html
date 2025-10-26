@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verificar código · SAGJ</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <div class="brand">
+      <div class="brand__logo" aria-hidden="true">🔑</div>
+      <h1 class="brand__title">Verificar código</h1>
+      <p class="brand__subtitle">Ingresa el código que te enviamos</p>
+    </div>
+
+    <!-- Paso 2: Verificación + nueva clave -->
+    <form class="form" action="2.login.html" method="get" novalidate>   
+      <div class="field">
+        <label for="pass-nueva">Nueva contraseña</label>
+        <input id="pass-nueva" name="pass_nueva" type="password" placeholder="Nueva contraseña" autocomplete="new-password" />
+      </div>
+
+      <div class="field">
+        <label for="pass-confirm">Confirmar nueva contraseña</label>
+        <input id="pass-confirm" name="pass_confirm" type="password" placeholder="Repite la nueva contraseña" autocomplete="new-password" />
+      </div>
+
+      <div class="actions">
+        <a class="btn btn--ghost" href="3.recuperar-password.html">Volver</a>
+        <button class="btn" type="submit">Guardar</button>
+      </div>
+    </form>
+  </section>
+</main>
+</body>
+</html>

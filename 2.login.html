@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · SAGJ</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">⚖️</div>
+        <h1 class="brand__title">SAGJ</h1>
+        <p class="brand__subtitle">Sistema Automatizado de Gestión Judicial</p>
+      </div>
+
+   <!-- Navega a tu dashboard al iniciar sesión -->
+   <!-- Ahora el formulario envía email y password por POST JSON al webhook local
+     http://localhost:5678/webhook-test/iniciosession
+     y, en caso de éxito (2xx), redirige al dashboard `5.notificador-dashboard.html`. -->
+   <form id="loginForm" class="form" action="5.notificador-dashboard.html" method="get" novalidate>
+        <div class="field">
+          <label for="email">Correo</label>
+          <input id="email" name="email" type="email"
+                 placeholder="usuario@dominio.com" autocomplete="username" />
+        </div>
+
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" name="password" type="password"
+                 placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <div class="actions" style="justify-content:flex-end; margin-top: 8px;">
+          <a class="link" href="3.recuperar-password.html">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button class="btn" type="submit" style="margin-top:12px;">Ingresar</button>
+        <div id="formMessage" role="status" aria-live="polite" style="margin-top:8px;color:#b00020"></div>
+      </form>
+      <script>
+        (function(){
+          const form = document.getElementById('loginForm');
+          const emailInput = document.getElementById('email');
+          const passwordInput = document.getElementById('password');
+          const msg = document.getElementById('formMessage');
+          const submitBtn = form.querySelector('button[type="submit"]');
+
+          function showMessage(text, isError = true){
+            msg.style.color = isError ? '#b00020' : '#0a0';
+            msg.textContent = text;
+          }
+
+          function acceptedFromResponse(json, text){
+            // Comprueba varias formas comunes en las que un webhook puede indicar aceptado
+            if(json && (json.accepted === true || json.success === true || json.authenticated === true || json.authorized === true)) return true;
+            if(json && typeof json.status === 'string' && /accept|ok|success|authorized|authenticated/i.test(json.status)) return true;
+            // Caso específico pedido por el usuario: { "myField": "value" }
+            if(json && json.myField === 'value') return true;
+            if(typeof text === 'string' && /accept|accepted|ok|success|authorized|authenticated/i.test(text)) return true;
+            return false;
+          }
+
+          form.addEventListener('submit', async function(e){
+            e.preventDefault();
+            showMessage('', true);
+
+            const email = (emailInput.value || '').trim();
+            const password = (passwordInput.value || '');
+
+            if(!email || !password){
+              showMessage('Por favor ingresa correo y contraseña.');
+              return;
+            }
+
+            // Construir payload JSON
+            const payload = { email, password };
+
+            // Deshabilitar envío múltiple
+            submitBtn.disabled = true;
+            const previousText = submitBtn.textContent;
+            submitBtn.textContent = 'Verificando...';
+
+            try{
+              const resp = await fetch('http://localhost:5678/webhook/iniciosession', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+
+              // Intentar parsear JSON; si no es JSON, leer texto
+              let json = null;
+              let text = '';
+              try{
+                json = await resp.clone().json();
+              }catch(e){
+                try{ text = await resp.clone().text(); }catch(e){ text = resp.statusText || ''; }
+              }
+
+              if(resp.ok && acceptedFromResponse(json, text)){
+                // Redirigir al dashboard
+                window.location.href = form.action;
+                return;
+              }
+
+              // Si no es aceptado, mostrar mensaje con info del servidor
+              let serverMsg = '';
+              if(json){
+                // Preferir un campo message si existe
+                serverMsg = json.message || json.error || JSON.stringify(json);
+              } else if(text){
+                serverMsg = text;
+              } else {
+                serverMsg = 'Inicio de sesión no autorizado.';
+              }
+              showMessage('Acceso denegado: ' + serverMsg);
+
+            }catch(err){
+              // Error de red (por ejemplo, webhook no está corriendo)
+              showMessage('No se pudo conectar con el servicio de autenticación. Asegúrate de que el webhook esté corriendo en http://localhost:5678.');
+              console.error('fetch error:', err);
+            } finally {
+              submitBtn.disabled = false;
+              submitBtn.textContent = previousText;
+            }
+          });
+        })();
+      </script>
+    </section>
+  </main>
+</body>
+</html>

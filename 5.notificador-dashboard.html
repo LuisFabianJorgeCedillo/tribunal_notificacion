@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inicio · Notificador</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <!-- Encabezado con botón de perfil -->
+    <div class="brand" style="position:relative; padding-right:46px;">
+      <h1 class="brand__title" style="margin-right:8px;">Resumen del día</h1>
+      <p class="brand__subtitle">Notificador</p>
+
+      <!-- Botón usuario (arriba a la derecha) -->
+      <a href="notificador-perfil.html"
+         aria-label="Ir al perfil"
+         title="Perfil"
+         style="
+           position:absolute; top:0; right:0;
+           display:inline-flex; align-items:center; justify-content:center;
+           width:36px; height:36px; border-radius:999px;
+           border:1px solid var(--border);
+           background:#fff; text-decoration:none; font-size:18px;
+         ">👤</a>
+    </div>
+
+    <!-- KPIs como botones -->
+    <div class="grid">
+      <a class="btn" href="6.notificador-hoy.html"
+         style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px; text-decoration:none;">
+        <strong>Notificaciones hoy</strong>
+        <div class="kpi__num">3</div>
+      </a>
+
+      <a class="btn" href="7.notificador-pendientes.html"
+         style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px; text-decoration:none;">
+        <strong>Pendientes</strong>
+        <div class="kpi__num">1</div>
+      </a>
+
+      <a class="btn" href="8.notificador-enviadas.html"
+         style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:16px; text-decoration:none;">
+        <strong>Enviadas</strong>
+        <div class="kpi__num">2</div>
+      </a>
+    </div>
+
+    <!-- Botón Nueva notificación -->
+    <div class="actions" style="margin-top:16px;">
+      <a class="btn" href="9.notificador-nueva.html">Nueva notificación</a>
+    </div>
+
+    <!-- Link Ver historial completo -->
+    <div class="actions" style="justify-content:flex-start; margin-top:12px;">
+      <a class="link" href="10.notificador-historial.html">Ver historial completo</a>
+    </div>
+  </section>
+</main>
+</body>
+</html>
