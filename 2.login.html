@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Iniciar sesión · SAGJ</title>
   <link rel="stylesheet" href="styles.css" />
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Configuración de Supabase -->
+  <script src="supabase-config.js"></script>
 </head>
 <body>
   <main class="wrap">
@@ -41,6 +45,27 @@
       </form>
       <script>
         (function(){
+          // ============================================
+          // NO REDIRIGIR AUTOMÁTICAMENTE AL DASHBOARD
+          // Mejora de seguridad: Forzar login cada vez
+          // ============================================
+          
+          // Limpiar cualquier sesión existente al cargar el login
+          // Esto asegura que el usuario debe hacer login explícitamente
+          (async function clearOldSession() {
+            try {
+              const session = await checkAuth();
+              if (session) {
+                // Hay una sesión activa, pero estamos en login
+                // Esto puede suceder si el usuario navega hacia atrás
+                // NO redirigir automáticamente, dejar que inicie sesión
+                console.log('ℹ️ Sesión previa detectada - requiere nuevo login');
+              }
+            } catch (error) {
+              console.log('Sin sesión previa');
+            }
+          })();
+
           const form = document.getElementById('loginForm');
           const emailInput = document.getElementById('email');
           const passwordInput = document.getElementById('password');
@@ -50,16 +75,6 @@
           function showMessage(text, isError = true){
             msg.style.color = isError ? '#b00020' : '#0a0';
             msg.textContent = text;
-          }
-
-          function acceptedFromResponse(json, text){
-            // Comprueba varias formas comunes en las que un webhook puede indicar aceptado
-            if(json && (json.accepted === true || json.success === true || json.authenticated === true || json.authorized === true)) return true;
-            if(json && typeof json.status === 'string' && /accept|ok|success|authorized|authenticated/i.test(json.status)) return true;
-            // Caso específico pedido por el usuario: { "myField": "value" }
-            if(json && json.myField === 'value') return true;
-            if(typeof text === 'string' && /accept|accepted|ok|success|authorized|authenticated/i.test(text)) return true;
-            return false;
           }
 
           form.addEventListener('submit', async function(e){
@@ -74,8 +89,12 @@
               return;
             }
 
-            // Construir payload JSON
-            const payload = { email, password };
+            // Validar formato de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+              showMessage('Por favor ingresa un correo válido.');
+              return;
+            }
 
             // Deshabilitar envío múltiple
             submitBtn.disabled = true;
@@ -83,43 +102,52 @@
             submitBtn.textContent = 'Verificando...';
 
             try{
-              const resp = await fetch('http://localhost:5678/webhook/iniciosession', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+              // Intentar iniciar sesión con Supabase
+              const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
               });
 
-              // Intentar parsear JSON; si no es JSON, leer texto
-              let json = null;
-              let text = '';
-              try{
-                json = await resp.clone().json();
-              }catch(e){
-                try{ text = await resp.clone().text(); }catch(e){ text = resp.statusText || ''; }
-              }
-
-              if(resp.ok && acceptedFromResponse(json, text)){
-                // Redirigir al dashboard
-                window.location.href = form.action;
+              if (error) {
+                // Manejar errores específicos
+                let errorMessage = 'Error al iniciar sesión.';
+                
+                if (error.message.includes('Invalid login credentials')) {
+                  errorMessage = 'Correo o contraseña incorrectos.';
+                } else if (error.message.includes('Email not confirmed')) {
+                  errorMessage = 'Por favor confirma tu correo electrónico.';
+                } else if (error.message.includes('User not found')) {
+                  errorMessage = 'Usuario no encontrado.';
+                } else {
+                  errorMessage = error.message;
+                }
+                
+                showMessage(errorMessage);
+                console.error('❌ Error de autenticación:', error);
                 return;
               }
 
-              // Si no es aceptado, mostrar mensaje con info del servidor
-              let serverMsg = '';
-              if(json){
-                // Preferir un campo message si existe
-                serverMsg = json.message || json.error || JSON.stringify(json);
-              } else if(text){
-                serverMsg = text;
-              } else {
-                serverMsg = 'Inicio de sesión no autorizado.';
+              if (data.session) {
+                // Login exitoso
+                console.log('✅ Login exitoso');
+                showMessage('¡Inicio de sesión exitoso! Redirigiendo...', false);
+                
+                // Guardar información adicional
+                localStorage.setItem('user_email', email);
+                
+                // IMPORTANTE: initSessionTracking se llama automáticamente
+                // por el listener onAuthStateChange en supabase-config.js
+                
+                // Redirigir al dashboard después de un breve delay
+                setTimeout(() => {
+                  window.location.href = '5.notificador-dashboard.html';
+                }, 800);
               }
-              showMessage('Acceso denegado: ' + serverMsg);
 
-            }catch(err){
-              // Error de red (por ejemplo, webhook no está corriendo)
-              showMessage('No se pudo conectar con el servicio de autenticación. Asegúrate de que el webhook esté corriendo en http://localhost:5678.');
-              console.error('fetch error:', err);
+            } catch(err) {
+              // Error inesperado
+              showMessage('Error de conexión. Por favor verifica tu configuración de Supabase.');
+              console.error('❌ Error inesperado:', err);
             } finally {
               submitBtn.disabled = false;
               submitBtn.textContent = previousText;

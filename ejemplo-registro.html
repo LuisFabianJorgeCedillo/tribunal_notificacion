@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Registro de Usuario · SAGJ</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Configuración de Supabase -->
+  <script src="supabase-config.js"></script>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">⚖️</div>
+        <h1 class="brand__title">SAGJ</h1>
+        <p class="brand__subtitle">Sistema Automatizado de Gestión Judicial</p>
+      </div>
+
+      <h2 style="text-align: center; margin-bottom: 16px;">Crear cuenta</h2>
+
+      <form id="registerForm" class="form" novalidate>
+        <div class="field">
+          <label for="email">Correo electrónico</label>
+          <input id="email" name="email" type="email"
+                 placeholder="usuario@dominio.com" autocomplete="email" required />
+        </div>
+
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" name="password" type="password"
+                 placeholder="••••••••" autocomplete="new-password" required />
+          <small style="color: #666; font-size: 0.875rem;">Mínimo 6 caracteres</small>
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirmar contraseña</label>
+          <input id="confirmPassword" name="confirmPassword" type="password"
+                 placeholder="••••••••" autocomplete="new-password" required />
+        </div>
+
+        <button class="btn" type="submit" style="margin-top:16px;">Crear cuenta</button>
+        <div id="formMessage" role="status" aria-live="polite" style="margin-top:12px;color:#b00020"></div>
+      </form>
+
+      <div class="actions" style="justify-content:center; margin-top: 16px;">
+        <a class="link" href="2.login.html">¿Ya tienes cuenta? Inicia sesión</a>
+      </div>
+
+      <script>
+        (function(){
+          // Verificar si el usuario ya está autenticado
+          checkAuth().then(session => {
+            if (session) {
+              // Si ya hay sesión, redirigir al dashboard
+              window.location.href = '5.notificador-dashboard.html';
+            }
+          });
+
+          const form = document.getElementById('registerForm');
+          const emailInput = document.getElementById('email');
+          const passwordInput = document.getElementById('password');
+          const confirmPasswordInput = document.getElementById('confirmPassword');
+          const msg = document.getElementById('formMessage');
+          const submitBtn = form.querySelector('button[type="submit"]');
+
+          function showMessage(text, isError = true){
+            msg.style.color = isError ? '#b00020' : '#0a0';
+            msg.textContent = text;
+          }
+
+          form.addEventListener('submit', async function(e){
+            e.preventDefault();
+            showMessage('', true);
+
+            const email = (emailInput.value || '').trim();
+            const password = (passwordInput.value || '');
+            const confirmPassword = (confirmPasswordInput.value || '');
+
+            // Validaciones
+            if(!email || !password || !confirmPassword){
+              showMessage('Por favor completa todos los campos.');
+              return;
+            }
+
+            // Validar formato de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+              showMessage('Por favor ingresa un correo válido.');
+              return;
+            }
+
+            // Validar longitud de contraseña
+            if (password.length < 6) {
+              showMessage('La contraseña debe tener al menos 6 caracteres.');
+              return;
+            }
+
+            // Validar que las contraseñas coincidan
+            if (password !== confirmPassword) {
+              showMessage('Las contraseñas no coinciden.');
+              return;
+            }
+
+            // Deshabilitar envío múltiple
+            submitBtn.disabled = true;
+            const previousText = submitBtn.textContent;
+            submitBtn.textContent = 'Creando cuenta...';
+
+            try{
+              // Registrar usuario en Supabase
+              const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                  // Puedes agregar metadata adicional aquí
+                  data: {
+                    // nombre: '',
+                    // apellido: '',
+                  }
+                }
+              });
+
+              if (error) {
+                // Manejar errores específicos
+                let errorMessage = 'Error al crear la cuenta.';
+                
+                if (error.message.includes('already registered')) {
+                  errorMessage = 'Este correo ya está registrado.';
+                } else if (error.message.includes('Password should be')) {
+                  errorMessage = 'La contraseña no cumple con los requisitos de seguridad.';
+                } else if (error.message.includes('Invalid email')) {
+                  errorMessage = 'Correo electrónico inválido.';
+                } else {
+                  errorMessage = error.message;
+                }
+                
+                showMessage(errorMessage);
+                console.error('Error de registro:', error);
+                return;
+              }
+
+              if (data.user) {
+                // Registro exitoso
+                showMessage('¡Cuenta creada exitosamente!', false);
+                
+                // Verificar si requiere confirmación de email
+                if (data.session) {
+                  // Confirmación automática - redirigir al dashboard
+                  showMessage('¡Cuenta creada! Redirigiendo...', false);
+                  setTimeout(() => {
+                    window.location.href = '5.notificador-dashboard.html';
+                  }, 1500);
+                } else {
+                  // Requiere confirmación de email
+                  showMessage('¡Cuenta creada! Por favor revisa tu correo para confirmar tu cuenta.', false);
+                  setTimeout(() => {
+                    window.location.href = '2.login.html';
+                  }, 3000);
+                }
+              }
+
+            } catch(err) {
+              // Error inesperado
+              showMessage('Error de conexión. Por favor verifica tu configuración de Supabase.');
+              console.error('Error inesperado:', err);
+            } finally {
+              submitBtn.disabled = false;
+              submitBtn.textContent = previousText;
+            }
+          });
+        })();
+      </script>
+    </section>
+  </main>
+</body>
+</html>
